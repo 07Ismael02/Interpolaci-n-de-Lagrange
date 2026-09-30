@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Aplicación educativa de interpolación polinómica de Lagrange.">
+  <title>Interpolación de Lagrange | Análisis Numérico</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__orb hero__orb--one"></div>
+    <div class="hero__orb hero__orb--two"></div>
+    <div class="container hero__content">
+      <p class="eyebrow">Análisis Numérico · Sesión 8</p>
+      <h1>Interpolación Polinómica de <span>Lagrange</span></h1>
+      <p class="hero__lead">Construye, simplifica, evalúa y verifica el polinomio paso a paso.</p>
+      <div class="hero__chips"><span>Algoritmo O(n²)</span><span>Procedimiento visible</span><span>Gráfica interactiva</span></div>
+    </div>
+  </header>
+
+  <main class="container main-stack">
+    <div id="message" class="message" role="alert" aria-live="polite" hidden></div>
+
+    <section class="step-card" id="paso-1">
+      <div class="step-heading"><span class="step-number">01</span><div><p class="step-kicker">Entrada</p><h2>Datos del problema</h2></div></div>
+      <p class="section-intro">Ingresa los cuatro nodos experimentales y el punto que deseas evaluar. En el caso oficial, <strong>x</strong> es memoria RAM y <strong>y</strong> es latencia media.</p>
+      <div class="toolbar">
+        <button class="button button--secondary" id="load-official" type="button">Cargar caso oficial</button>
+        <button class="button button--ghost" id="clear-inputs" type="button">Limpiar</button>
+      </div>
+      <div class="input-layout">
+        <div class="table-scroll table-scroll--input">
+          <table class="input-table">
+            <thead><tr><th>Punto</th><th>x<sub>i</sub> · Memoria (GB)</th><th>y<sub>i</sub> · Latencia (ms)</th></tr></thead>
+            <tbody id="points-input"></tbody>
+          </table>
+        </div>
+        <div class="eval-panel">
+          <label for="x-eval"><span>Punto a evaluar</span><span class="math-label">x<sub>eval</sub></span></label>
+          <input id="x-eval" type="number" step="any" aria-label="Punto x a evaluar">
+          <small>Puede estar dentro o fuera de los nodos.</small>
+        </div>
+      </div>
+      <div class="actions"><button class="button button--primary" id="interpolate" type="button">Interpolar paso a paso <span aria-hidden="true">→</span></button></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-2" hidden>
+      <div class="step-heading"><span class="step-number">02</span><div><p class="step-kicker">Fundamento</p><h2>Fórmula general</h2></div></div>
+      <div class="formula-hero">
+        <div><span>Polinomio fundamental</span><code>L<sub>k</sub>(x) = ∏ <span class="fraction"><b>x − x<sub>i</sub></b><b>x<sub>k</sub> − x<sub>i</sub></b></span>, i ≠ k</code></div>
+        <div><span>Polinomio interpolador</span><code>P<sub>3</sub>(x) = Σ y<sub>k</sub> · L<sub>k</sub>(x)</code></div>
+      </div>
+      <p class="info-note">Cada L<sub>k</sub>(x) vale <strong>1</strong> en su propio nodo y <strong>0</strong> en los demás. La evaluación utiliza dos bucles anidados: uno para k y otro para i.</p>
+    </section>
+
+    <section class="step-card result-section base-section" id="paso-3" hidden>
+      <div class="step-heading"><span class="step-number">03</span><div><p class="step-kicker">Base fundamental</p><h2>Construcción de L<sub>0</sub>(x)</h2></div></div><div id="base-0"></div>
+    </section>
+    <section class="step-card result-section base-section" id="paso-4" hidden>
+      <div class="step-heading"><span class="step-number">04</span><div><p class="step-kicker">Base fundamental</p><h2>Construcción de L<sub>1</sub>(x)</h2></div></div><div id="base-1"></div>
+    </section>
+    <section class="step-card result-section base-section" id="paso-5" hidden>
+      <div class="step-heading"><span class="step-number">05</span><div><p class="step-kicker">Base fundamental</p><h2>Construcción de L<sub>2</sub>(x)</h2></div></div><div id="base-2"></div>
+    </section>
+    <section class="step-card result-section base-section" id="paso-6" hidden>
+      <div class="step-heading"><span class="step-number">06</span><div><p class="step-kicker">Base fundamental</p><h2>Construcción de L<sub>3</sub>(x)</h2></div></div><div id="base-3"></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-7" hidden>
+      <div class="step-heading"><span class="step-number">07</span><div><p class="step-kicker">Combinación</p><h2>Construcción de P<sub>3</sub>(x)</h2></div></div>
+      <div id="polynomial-content"></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-8" hidden>
+      <div class="step-heading"><span class="step-number">08</span><div><p class="step-kicker">Estimación</p><h2>Evaluación en x<sub>eval</sub></h2></div></div>
+      <div id="evaluation-content"></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-9" hidden>
+      <div class="step-heading"><span class="step-number">09</span><div><p class="step-kicker">Validación</p><h2>Comprobación en los nodos</h2></div></div>
+      <p class="section-intro">Un interpolador correcto reproduce los valores originales; las pequeñas diferencias pueden provenir del punto flotante.</p>
+      <div class="table-scroll"><table id="verification-table"><thead><tr><th>x<sub>i</sub></th><th>y<sub>i</sub> original</th><th>P<sub>3</sub>(x<sub>i</sub>)</th><th>Diferencia</th></tr></thead><tbody></tbody></table></div>
+      <div id="max-difference" class="verification-summary"></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-10" hidden>
+      <div class="step-heading"><span class="step-number">10</span><div><p class="step-kicker">Conclusión visual</p><h2>Interpretación y gráfica</h2></div></div>
+      <div id="interpretation" class="interpretation"></div>
+      <div class="chart-shell">
+        <div class="chart-heading"><div><h3>Curva del polinomio interpolador</h3><p>Datos, modelo continuo y estimación en un mismo plano.</p></div><span id="chart-interval"></span></div>
+        <div class="chart-frame"><canvas id="lagrange-chart" role="img" aria-label="Gráfica de los datos experimentales, polinomio interpolador y punto evaluado"></canvas></div>
+        <div class="chart-legend" aria-label="Leyenda"><span><i class="dot dot--data"></i>Datos experimentales</span><span><i class="line"></i>P3(x)</span><span><i class="diamond"></i>Punto interpolado</span></div>
+      </div>
+      <div class="actions actions--spread"><button class="button button--secondary" id="copy-procedure" type="button">Copiar procedimiento</button><span id="copy-status" class="copy-status" aria-live="polite"></span></div>
+    </section>
+  </main>
+
+  <footer><div class="container"><p>Análisis Numérico · Sesión 8</p><p>Interpolación Polinómica de Lagrange</p></div></footer>
+</body>
+</html>
